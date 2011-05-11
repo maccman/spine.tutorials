@@ -177,9 +177,57 @@ tabs.render();
 
 <h2>List</h2>
 
-<p>The <code>Spine.List</code> class is basically for a dynamic set of tabs populated by model data.</p>
+<p>The <code>Spine.List</code> class is basically for a dynamic set of tabs populated by model data. For example, the <a href="https://github.com/maccman/spine.contacts">Spine.Contacts</a> application uses <code>Spine.List</code> to render the list of contacts in the sidebar and changing the currently selected contact when clicked.</p>
 
-<pre><code>&lt;div id="layout2"&gt;
+<p><img src="https://lh5.googleusercontent.com/_IH1OempnqUc/TZpgYfnlUBI/AAAAAAAABKg/UYLhdmoc15o/s500/contacts.png" alt="Spine Contacts" /></p>
+
+<p>As always, the first step is is to include the required libraries. We're going to need templating for rendering our list, and in this example we'll be using <a href="https://github.com/jquery/jquery-tmpl">jQuery.tmpl</a>. We also need to include <a href="https://github.com/maccman/spine/raw/master/lib/spine.tmpl.js">spine.tmpl.js</a> which includes some templating utilities. Lastly we obviously need to include <a href="https://github.com/maccman/spine/raw/master/lib/spine.list.js">spine.list.js</a>,</p>
+
+<pre><code>&lt;script src="jquery.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+&lt;script src="jquery.tmpl.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+&lt;script src="spine.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+&lt;script src="spine.tmpl.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+&lt;script src="spine.list.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>As with the Spine.Contacts application, we're going to have a list of contact names in a sidebar. When users select a contact, its full information will be displayed in the main section. <code>Spine.List</code> will make that remarkably simple. It'll render the contacts list, control the currently selected contact, and trigger a <em>change</em> event when a new one is selected.</p>
+
+<p>When instantiating a <code>Spine.List</code>, you need to pass in a <code>el</code> and <code>template</code> options, to indicate the element the list is associated with, and the template it should use for rendering records.</p>
+
+<pre><code>var list = Spine.List.init({
+  el: $("#sidebar ul"),
+  template: function(items){
+    return($("#items-template").tmpl(items));
+  }
+});
+</code></pre>
+
+<p>The <code>template</code> option should be a function that takes records and returns DOM elements. In this example, we're calling <code>.tmpl()</code> on a inline script template. For more information on how this works, please see <a href="http://api.jquery.com/jquery.tmpl">jQuery.tmpl's docs</a>.</p>
+
+<p>We now need to render our list with records. Typically this is done whenever any records in the list are created, updated or destroyed. We can do this by passing a list of records to the list's <code>render()</code> function</p>
+
+<pre><code>list.render(Contact.all());
+</code></pre>
+
+<p>Lastly we need to listen to <em>change</em> events, which will be invoked whenever users click on the list, changing the currently selected item.</p>
+
+<pre><code>list.bind("change", function(item){
+  // list was changed to item!
+});
+</code></pre>
+
+<p>That's all there is to <code>Spine.List</code>. Now let's show a full example to give you a bit of context. Firstly we're going to need two simple template, <code>#contacts-template</code> for the list and <code>#contact-template</code> for the main view. Then, as demonstrated above, we're going to render the list and listen to <em>change</em> events. When the currently selected item in the list changes, we'll re-render the main view with the newly selected record.</p>
+
+<pre><code>&lt;script type="text/x-template" charset="utf-8" id="contacts-template"&gt;
+  &lt;li&gt;${name}&lt;/li&gt;
+&lt;/script&gt;
+
+&lt;script type="text/x-template" charset="utf-8" id="contact-template"&gt;
+  &lt;p&gt;${name}&lt;/p&gt;
+  &lt;!-- ... --&gt;
+&lt;/script&gt;
+
+&lt;div id="layout2"&gt;
   &lt;div class="sidebar"&gt;
     &lt;ul&gt;&lt;/ul&gt;
   &lt;/div&gt;
@@ -192,6 +240,7 @@ tabs.render();
     // Create model
     var Contact = Spine.Model.setup("Contact", ["name"]);
 
+    // Create List, override default template
     var SideBar = Spine.List.create({
       template: function(items){
         return $("#contacts-template").tmpl(items)            
@@ -200,7 +249,7 @@ tabs.render();
 
     // Create controller
     var Contacts = Spine.Controller.create({
-      elements: {".list": "listEl"},
+      elements: {".list": "listEl", ".main": "main"},
       proxied: ["render", "change"],
 
       init: function(){
@@ -211,18 +260,24 @@ tabs.render();
 
       render: function(){
         this.list.render(Contact.all());
+        this.main.html($("#contact-template").tmpl(this.current));
       },
 
       change: function(item){
         this.current = item;
-        this.el.html($("#contact-template").tmpl(item));
+        this.render();
       }
     });
 
     Contacts.init({el: $("#layout2")});
+    Contact.fetch();
   })(Spine, Spine.$);
 &lt;/script&gt;
 </code></pre>
+
+<p>That may look like a lot of code, but in reality it's fairly straightforward. Whenever the currently selected item in the list changes, then <code>Contacts.fn.render()</code> function will be called, re-rendering the main view. When the application first loads, if no list items are selected then <code>Spine.List</code> will select the first item in its list.</p>
+
+<p>Like <code>Spine.Tabs</code>, <code>Spine.List</code> will add a class of <em>active</em> to the currently selected list item, which you can style with CSS to give the user a visual indication of what is currently selected.</p>
 </div>
 </body>
 </html>

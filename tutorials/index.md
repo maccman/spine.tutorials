@@ -10,11 +10,11 @@ You should briefly read the [existing documentation](http://maccman.github.com/s
 
 * [Form tutorial](form.html) - explores how to receive form details, update records and validate models.
 
-* [Server tutorial](server.html) - explains how to sync your application with a server using Ajax and REST.
+<!-- * [Server tutorial](server.html) - explains how to sync your application with a server using Ajax and REST. -->
 
 * [Controller patterns](patterns.html) - common controller patterns for rendering views.
 
-* [Templating](templating.html) - demonstrates how to use the jQuery.tmpl library to render views. 
+<!-- * [Templating](templating.html) - demonstrates how to use the jQuery.tmpl library to render views.  -->
 
 
 If you've any suggestions for additional tutorials, or questions about Spine, please [post them on the mailing list](https://groups.google.com/forum/#!forum/spinejs). 
