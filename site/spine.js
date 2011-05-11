@@ -385,8 +385,8 @@
     save: function(){
       var error = this.validate();
       if ( error ) {
-        if ( !this.trigger("error", this, error) )
-          throw("Validation failed: " + error);
+        this.trigger("error", this, error)
+        return false;
       }
       
       this.trigger("beforeSave", this);

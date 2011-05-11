@@ -12,11 +12,142 @@
 </script>
 </head>
 <body>
-<div id="container"><h1>Updating Record</h1>
+<div id="container"><h1>Form tutorial</h1>
 
-<p>validation
-getting form data
-updateAttributes</p>
+<p>Forms are a staple part of almost every web application, so it's important to know how to manipulate them, fetch data and update models.</p>
+
+<h2>Capturing form events</h2>
+
+<p>The first step is actually capture the form's <em>submit</em> event, so we know when a user wants to submit a form. The easiest way of doing this, is with Spine's controllers <code>events</code> option, for example:</p>
+
+<pre><code>var Contacts = Spine.Controller.create({
+  events: {"submit form.contactForm": "create"},
+
+  create: function(e){
+    // Form submitted
+  }
+});
+
+Contacts.init({el: $("body")});
+</code></pre>
+
+<p>The <code>events</code> property ensures that all <em>submit</em> events on the matching form are captured, calling the create function. Now, by default, forms cause a page reload. This is definitely not the behavior we want, since the page reloads, we've lost all state. Rather, we're going to send any required requests to the server using Ajax.</p>
+
+<p>To ensure the form doesn't reload the page, we're going to need to cancel the 'default event'. This is easily done on the event object passed to our  <code>create()</code> function.</p>
+
+<pre><code>var Contacts = Spine.Controller.create({
+  events: {"submit form.contactForm": "create"},
+  create: function(e){
+    e.preventDefault();
+    // Form stuff
+  }
+});
+</code></pre>
+
+<p>Calling <code>preventDefault()</code> on the event prevents the default action, and is preferable to the alternative of returning <code>false</code> from the function as the latter approach cancels event propagation (something we could need later), and makes debugging extremely difficult if any code inside the event callback throws errors.</p>
+
+<h2>Retrieving form data</h2>
+
+<p>So, now we know when forms are being submitted, but how about actually retrieving the data contained inside the form. We could manually go through every input element in the form, reading their value, but we're lazy so let's automate it!</p>
+
+<p><a href="http://jquery.com">jQuery</a> has a rather useful function called <code>serializeArray()</code> (<a href="api.jquery.com/serializeArray/">documented here</a>), which serializes forms based on their input's name and values. However, the returned result looks like this, and can't be directly used with Spine:</p>
+
+<pre><code>[{name: "first_name", value: "Alex"}, {name: "last_name", value: "MacCaw"}]
+</code></pre>
+
+<p>Let's create a plugin to jQuery which adds an additional function, <code>serializeForm()</code>.</p>
+
+<pre><code>$.fn.serializeForm = function(){
+  var result = {};
+  $.each($(this).serializeArray(), function(i, item){
+    result[item.name] = item.value;
+  });
+  return result;
+};
+</code></pre>
+
+<p>This function basically takes the data returned from jQuery's <code>serializeArray()</code> and transforms it into a more useful format:</p>
+
+<pre><code>{first_name: "Alex", last_name: "MacCaw"}
+</code></pre>
+
+<p>Let's put everything together so you can see how form serialization works in context.</p>
+
+<pre><code>var Contacts = Spine.Controller.create({
+  elements: {"form.contactForm": "form"}
+  events: {"submit form.contactForm": "create"},
+  create: function(e){
+    e.preventDefault();
+    var data = this.form.serializeForm();
+  }
+});
+</code></pre>
+
+<h2>Updating a record</h2>
+
+<p>Updating a record is now trivial, we have the data, all we need is the record. If you're using the <a href="http://maccman.github.com/spine#s-patterns-the-element-pattern"><em>element pattern</em></a>, then you've already got a local reference to the record. All you need to do now is call <code>create()</code> or <code>updateAttributes()</code> depending on whether you want to create a record, or update an existing one.</p>
+
+<pre><code>var Contacts = Spine.Controller.create({
+  elements: {"form.contactForm": "form"}
+  events: {"submit form.contactForm": "create"},
+  create: function(e){
+    e.preventDefault();
+    var data = this.form.serializeForm();
+    var contact = Contact.create(data);
+  }
+});
+</code></pre>
+
+<p>If, on the other hand, you don't have a local reference to the record at hand, you'll have to get one. If you're using <a href="http://api.jquery.com/category/plugins/templates/">jQuery.tmpl</a> templating library, you can see which record an HTML element is associated with, by calling <code>tmplItem()</code>.</p>
+
+<p>However, unfortunately the format this function returns isn't exactly what we need, so let's add an additional function to jQuery.tmpl called <code>item()</code>:</p>
+
+<pre><code>$.fn.item = function(){
+  var item = $(this).tmplItem().data;
+  return($.isFunction(item.reload) ? item.reload() : null);
+};
+</code></pre>
+
+<p>Now we can just call <code>item()</code> on a HTML element to retrieve the record it's associated with.</p>
+
+<pre><code>var Contacts = Spine.Controller.create({
+  events: {"submit .item form": "update"},
+
+  update: function(e){
+    e.preventDefault();
+    var data = $(e.target).serializeForm();
+    var item = $(e.target).item();
+    item.updateAttributes(data);
+  }
+});
+</code></pre>
+
+<h2>Adding validation</h2>
+
+<p>Validation is dirt simple, and leaves you a lot of flexibility in how you display error messages to users. Firstly, to add validation to your models, you need to override the model's instance function called <code>validate()</code>. Essentially, if <code>validate()</code> returns anything, validation fails. Let's see how we'd validate the presence of a <code>first_name</code> attribute on a model:</p>
+
+<pre><code>var Contact = Spine.Model.setup("Contact", ["first_name"]);
+Contact.include({
+  validate: function(){
+    if ( !this.first_name )
+      return "First name is required";
+  }
+});
+</code></pre>
+
+<p>So, if the record's <code>first_name</code> is missing or an empty string, <code>validate()</code> will return a message and validation will fail (empty strings coerce to <code>false</code> in JavaScript).</p>
+
+<p>In your controller's, you can cater for failing validation by checking to see if the record is valid before you save it:</p>
+
+<pre><code>if ( item.save() ) {
+  // Coolio...
+} else {
+  var msg = item.validate();
+  alert(msg);
+}
+</code></pre>
+
+<p><code>save()</code> and <code>updateAttributes()</code> both return <code>false</code> if validation fails. <code>validate()</code> returns the actual error message. In the example above we're doing the simplest possible thing, opening an alert box containing the validation failure message. You may want to display more information to users, such as highlight the relevant inputs. This you can do by returning an object from <code>validate()</code>, specifying which attributes are at fault and their associated error messages.</p>
 </div>
 </body>
 </html>
