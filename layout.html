@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8>
+<title>Spine Tutorials</title>
+<link rel="stylesheet" href="site/site.css" type="text/css" charset="utf-8">
+<link rel="stylesheet" href="site/highlight.css" type="text/css" charset="utf-8">
+<script src="site/jquery.js" type="text/javascript" charset="utf-8"></script>      
+<script src="site/highlight.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+  hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="container"><h1>Manager</h1>
+
+<h1>Tabs</h1>
+
+<pre><code>&lt;div id="layout1"&gt;
+  &lt;div class="tabs"&gt;
+    &lt;ul&gt;
+      &lt;li data-name="users"&gt;Users&lt;/li&gt;
+      &lt;li data-name="groups"&gt;Groups&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+
+  &lt;div class="views"&gt;
+
+    &lt;div class="users"&gt;
+      &lt;div class="sidebar"&gt;
+        &lt;ul&gt;
+          &lt;li&gt;Option 1&lt;/li&gt;
+          &lt;li&gt;Option 2&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+
+      &lt;div class="main"&gt;
+        Main
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="groups"&gt;
+      &lt;h3&gt;Groups&lt;/h3&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script type="text/javascript" charset="utf-8"&gt;
+  (function(){
+    var Users  = Spine.Controller.create();
+    var Groups = Spine.Controller.create();
+
+    var users  = Users.init();
+    var groups = Groups.init();
+
+    Spine.Manager.init(users, groups);
+
+    var tabs = Spine.Tabs.init();
+    tabs.connect("users", users);
+    tabs.connect("groups", groups);
+  })();
+&lt;/script&gt;
+</code></pre>
+
+<h1>List</h1>
+
+<pre><code>&lt;div id="layout2"&gt;
+  &lt;div class="sidebar"&gt;
+    &lt;ul&gt;&lt;/ul&gt;
+  &lt;/div&gt;
+  &lt;div class="main"&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script type="text/javascript" charset="utf-8"&gt;
+  (function(Spine, $){
+    // Create model
+    var Contact = Spine.Model.setup("Contact", ["name"]);
+
+    var SideBar = Spine.List.create({
+      template: function(items){
+        return $("#contacts-template").tmpl(items)            
+      }
+    });
+
+    // Create controller
+    var Contacts = Spine.Controller.create({
+      elements: {".list": "listEl"},
+      proxied: ["change"],
+
+      init: function(){
+        this.list = SideBar.init({el: this.listEl});
+
+        this.list.bind("change", this.change);
+        Contact.bind("refresh change", this.render);
+      },
+
+      render: function(){
+        this.list.render(Contact.all());
+      },
+
+      change: function(item){
+        this.current = item;
+        this.el.html($("#contact-template").tmpl(item));
+      }
+    });
+
+    Contacts.init({el: $("#layout2")});
+  })(Spine, Spine.$);
+&lt;/script&gt;
+</code></pre>
+</div>
+</body>
+</html>
