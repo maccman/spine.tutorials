@@ -1,3 +1,5 @@
+<div class="back"><a href="index.html">&laquo; Back to all tutorials</a></div>
+
 #Form tutorial
 
 Forms are a staple part of almost every web application, so it's important to know how to manipulate them, fetch data and update models. 
@@ -28,7 +30,7 @@ To ensure the form doesn't reload the page, we're going to need to cancel the 'd
       }
     });
 
-Calling `preventDefault()` on the event prevents the default action, and is preferable to the alternative of returning `false` from the function as the latter approach cancels event propagation (something we could need later), and makes debugging extremely difficult if any code inside the event callback throws errors. 
+Calling `preventDefault()` on the event prevents the default action, and is preferable to the alternative of returning `false` from the function. The latter approach cancels event propagation (something we could need later), and makes debugging extremely difficult if any code inside the event callback throws errors. 
 
 ##Retrieving form data
 

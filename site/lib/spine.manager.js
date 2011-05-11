@@ -3,7 +3,8 @@
 // In other words, you feed a manager controllers, and it'll make sure that only controller has an 'active' state at any one time. 
 // This is useful whenever you're implementing tabs or separate views inside an application. 
 //
-// By default, whenever a controller is activated, it's element receives a 'active' class, and whenever it's deactivated it has a 'deactive' class. // You can use these classes to show/hide views and tabs via CSS.
+// By default, whenever a controller is activated, it's element receives a 'active' class, and whenever it's deactivated it has a 'deactive' class.
+// You can use these classes to show/hide views and tabs via CSS.
 // For example:
 //
 //  var users = Users.init();

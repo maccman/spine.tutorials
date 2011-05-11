@@ -12,9 +12,128 @@
 </script>
 </head>
 <body>
-<div id="container"><h1>Manager</h1>
+<div id="container"><div class="back"><a href="index.html">&laquo; Back to all tutorials</a></div>
 
-<h1>Tabs</h1>
+
+<h1>Layout</h1>
+
+<p>Aside from the simplest of applications, the vast majority have need of multiple views and layouts. Unfortunately, in our JavaScript web applications, we don't have the luxury of putting views on separate pages, since there's no page reloading. Instead, we need to place all the views inside the page, showing or hiding them as appropriate.</p>
+
+<p><a href="http://maccman.github.com/spine">Spine</a> has a couple of utilities to help you do this, <em>spine.manager.js</em>, <em>spine.tabs.js</em> and <em>spine.list.js</em>.</p>
+
+<h2>Manager</h2>
+
+<p><code>Spine.Manager</code> is essentially a state machine for controllers. Controllers are added to the manager, and the manager controls state for its associated controllers. A controller's state is either <em>active</em> or <em>deactive</em>. <code>Spine.Manager</code> ensures that only one controller is active at any one time; when another controller is 'activated', all other controllers will be deactivated.</p>
+
+<p>To use the <code>Manager</code> class, we first we need to include the <em>spine.manager.js</em> script, which you can find in <a href="https://github.com/maccman/spine/raw/master/lib/spine.manager.js">Spine's repository</a>. Let's demonstrate this by creating a couple of controllers, adding them to a <code>Manager</code> instance, and change their state.</p>
+
+<pre><code>var Users  = Spine.Controller.create();
+var Groups = Spine.Controller.create();
+
+var users  = Users.init();
+var groups = Groups.init();
+
+Spine.Manager.init(users, groups);
+
+users.active();
+assert( users.isActive() );
+assert( !groups.isActive() );
+
+groups.active();
+assert( groups.isActive() );
+assert( !users.isActive() );
+</code></pre>
+
+<p>So, as you can above, Spine gives your controllers an <code>isActive()</code> function which returns a boolean indicating whether the controller's state is <em>active</em>. In addition, we now have a <code>active()</code> function which we can call on controllers to activate them.</p>
+
+<p>The manager ensures that only one controller in its set is activated at any one time. When the <code>users</code> controller is activated (by calling <code>active()</code>), the groups controller will be deactivated, and vice versa.</p>
+
+<p>When a controller is activated, it's <code>activate()</code> function will be called. Likewise, when it's deactivated it's <code>deactivate()</code> function will be called. These are already implemented, but you can override them to add custom behavior.</p>
+
+<p>By default, the controller's <code>activate()</code> function adds an <em>active</em> class onto the controller's element (<code>el</code>). The deactivate function removes this class.</p>
+
+<pre><code>// ...
+activate: function(){
+  this.el.addClass("active");
+  return this;
+},
+
+deactivate: function(){
+  this.el.removeClass("active");
+  return this;
+}
+</code></pre>
+
+<p>Hopefully you're starting to see how we can apply this to showing and hiding views. Take <a href="http://github.com/maccman/holla">Holla</a> for instance. It has a settings view, and a channel view - both associated with controllers. They need to be displayed independently, and changed using the sidebar menu.</p>
+
+<p>The simplest way of achieving this is by adding them both to a <code>Manager</code>, which will ensure that only one has an <em>active</em> class at any one time. Then, with CSS, we can hide views without the <em>active</em> class.</p>
+
+<pre><code>#views &gt; *:not(.active) {
+  display: none !important;
+}
+</code></pre>
+
+<p>When the two controllers are activated by the sidebar menu, the <em>active</em> class switches and the relevant view is shown.</p>
+
+<h2>Tabs</h2>
+
+<p>Spine provides a simple abstraction on top of it's <code>Spine.Manager</code> class for tab integration, <code>Spine.Tabs</code>. The class lets you associate a 'tab' with a controller, and when the tab is clicked the controller is activated.</p>
+
+<p>The first step is to include <a href="https://github.com/maccman/spine/raw/master/lib/spine.tabs.js">spine.tabs.js</a>. <code>Spine.Tabs</code> relies on either <a href="http://jquery.com">jQuery</a> or Zepto, so you'll need to include one or the other in the page too, as well as <a href="https://github.com/maccman/spine/raw/master/lib/spine.tabs.js">spine.manager.js</a>.</p>
+
+<pre><code>&lt;script src="jquery.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+&lt;script src="spine.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+&lt;script src="spine.manager.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+&lt;script src="spine.tabs.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>Now all the required libraries are loaded, we can start creating our tabs and associating them with controllers. Spine has no restrictions on the tab markup, except that there's a <code>data-name</code> attribute present on the tab. Usually one would create a list of <code>&lt;li&gt;</code> elements, and float them like so:</p>
+
+<pre><code>&lt;style type="text/css" media="screen"&gt;
+  .tabs {
+    list-style: none;
+    margin: 0; padding: 0;
+    overflow: hidden;
+  }
+
+  .tabs li {
+    float: left;
+    padding: 5px 10px;
+  }
+&lt;/style&gt;
+
+&lt;ul class="tabs"&gt;
+  &lt;li data-name="users"&gt;Users&lt;/li&gt;
+  &lt;li data-name="groups"&gt;Groups&lt;/li&gt;      
+  &lt;!-- ... --&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<p>So we now have a horizontal list of tabs, let's bind them up with <code>Spine.Tabs</code> and make them interactive!</p>
+
+<pre><code>var users  = Users.init({el: $("#layout1 .users")});
+var groups = Groups.init({el: $("#layout1 .groups")});
+
+Spine.Manager.init(users, groups);
+
+var tabs = Spine.Tabs.init({el: $("#layout1 .tabs")});
+tabs.connect("users", users);
+tabs.connect("groups", groups);
+
+// Select first tab
+tabs.render();
+</code></pre>
+
+<p>As you can see, we've added two controllers (<code>users</code>, <code>groups</code>) to a <code>Spine.Manager</code> instance, as explained in the first section of this tutorial. Then we're creating a <code>Spine.Tabs</code> instance, passing in the tabs <code>&lt;ul&gt;</code> element. Finally we're associating tabs with specific controllers using the <code>connect()</code> function. Connect takes two arguments: the name of the tab (i.e. the <code>data-name</code> attribute), and a controller.</p>
+
+<p>That's the full extent of the code needed to implement tabs. <code>Spine.Tabs</code> will make sure any click events on a tab activate the controller the tab is associated with, showing and hiding views as necessary. The class will also add a class of <em>active</em> onto the currently activated tab, so you can easily style it to show the user which tab is currently selected.</p>
+
+<pre><code>.tabs li.active {
+  border: 1px solid #000;
+}
+</code></pre>
+
+<p>The full code (minus styling) is shown below:</p>
 
 <pre><code>&lt;div id="layout1"&gt;
   &lt;div class="tabs"&gt;
@@ -25,43 +144,40 @@
   &lt;/div&gt;
 
   &lt;div class="views"&gt;
-
     &lt;div class="users"&gt;
-      &lt;div class="sidebar"&gt;
-        &lt;ul&gt;
-          &lt;li&gt;Option 1&lt;/li&gt;
-          &lt;li&gt;Option 2&lt;/li&gt;
-        &lt;/ul&gt;
-      &lt;/div&gt;
-
-      &lt;div class="main"&gt;
-        Main
-      &lt;/div&gt;
+      &lt;h3&gt;Users&lt;/h3&gt;
+      &lt;!-- ... --&gt;
     &lt;/div&gt;
 
     &lt;div class="groups"&gt;
       &lt;h3&gt;Groups&lt;/h3&gt;
+      &lt;!-- ... --&gt;
     &lt;/div&gt;
 &lt;/div&gt;
 
 &lt;script type="text/javascript" charset="utf-8"&gt;
-  (function(){
+  jQuery(function($){
     var Users  = Spine.Controller.create();
     var Groups = Spine.Controller.create();
 
-    var users  = Users.init();
-    var groups = Groups.init();
+    var users  = Users.init({el: $("#layout1 .users")});
+    var groups = Groups.init({el: $("#layout1 .groups")});
 
-    Spine.Manager.init(users, groups);
+    var manager = Spine.Manager.init();
+    manager.add(users, groups);
 
-    var tabs = Spine.Tabs.init();
+    var tabs = Spine.Tabs.init({el: $("#layout1 .tabs")});
     tabs.connect("users", users);
     tabs.connect("groups", groups);
-  })();
+
+    tabs.render();
+  });
 &lt;/script&gt;
 </code></pre>
 
-<h1>List</h1>
+<h2>List</h2>
+
+<p>The <code>Spine.List</code> class is basically for a dynamic set of tabs populated by model data.</p>
 
 <pre><code>&lt;div id="layout2"&gt;
   &lt;div class="sidebar"&gt;
@@ -85,11 +201,10 @@
     // Create controller
     var Contacts = Spine.Controller.create({
       elements: {".list": "listEl"},
-      proxied: ["change"],
+      proxied: ["render", "change"],
 
       init: function(){
         this.list = SideBar.init({el: this.listEl});
-
         this.list.bind("change", this.change);
         Contact.bind("refresh change", this.render);
       },

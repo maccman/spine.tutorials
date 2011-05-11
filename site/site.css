@@ -63,3 +63,8 @@ ul {
   width: 625px;
   margin: 40px 0 50px 40px;
 }
+
+.back {
+  float: right;
+  margin: 10px 5px 0 0;
+}

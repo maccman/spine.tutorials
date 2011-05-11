@@ -12,7 +12,10 @@
 </script>
 </head>
 <body>
-<div id="container"><h1>Form tutorial</h1>
+<div id="container"><div class="back"><a href="index.html">&laquo; Back to all tutorials</a></div>
+
+
+<h1>Form tutorial</h1>
 
 <p>Forms are a staple part of almost every web application, so it's important to know how to manipulate them, fetch data and update models.</p>
 
@@ -44,7 +47,7 @@ Contacts.init({el: $("body")});
 });
 </code></pre>
 
-<p>Calling <code>preventDefault()</code> on the event prevents the default action, and is preferable to the alternative of returning <code>false</code> from the function as the latter approach cancels event propagation (something we could need later), and makes debugging extremely difficult if any code inside the event callback throws errors.</p>
+<p>Calling <code>preventDefault()</code> on the event prevents the default action, and is preferable to the alternative of returning <code>false</code> from the function. The latter approach cancels event propagation (something we could need later), and makes debugging extremely difficult if any code inside the event callback throws errors.</p>
 
 <h2>Retrieving form data</h2>
 
