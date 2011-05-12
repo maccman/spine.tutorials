@@ -15,26 +15,170 @@
 <div id="container"><div class="back"><a href="index.html">&laquo; Back to all tutorials</a></div>
 
 
-<h1>Using jQuery.tmpl</h1>
+<h1>Templating</h1>
 
-<h1>Loading in templates</h1>
+<p>Templates are a core part of rendering views in JavaScript applications. In a nutshell, templates contain variables and simple flow logic, which you can parse with a templating library, interpolating data with template variables and generating raw HTML.</p>
 
-<h1>Rendering templates</h1>
+<p>To that extent, templating in JavaScript is very similar to templating in any other language, such as Ruby's ERB or Python's string interoperation. You just need to choose a templating library and stick with it, as the templating syntax differs slightly between them.</p>
 
-<h1>Finding template elements</h1>
+<p>One good choice is <a href="http://mustache.github.com">Mustache</a>, a JavaScript templating library that also has lots of implementations in other languages.</p>
 
-<pre><code>$.fn.item = function(){
-  var item = $(this).tmplItem().data;
-  return($.isFunction(item.reload) ? item.reload() : null);
+<p>However, the one I personally use and am going to demonstrate below is <a href="http://api.jquery.com/jquery.tmpl">jQuery.tmpl</a>, a templating plugin for jQuery. The general concepts should be the same whichever library you choose; you'll just have to look at the documentation for the specific syntax.</p>
+
+<h2>Rendering templates</h2>
+
+<p>jQuery.tmpl has one main function, <code>jQuery.tmpl()</code>, which you can pass a template and some data. It renders the template and returns raw HTML which you can then append to the document. If the data is an array, the template is rendered once for every data item in the array, otherwise a single template is rendered.</p>
+
+<pre><code>var object = {
+  url: "http://example.com",
+  getName: function(){ return "James"; }
 };
 
-$.fn.forItem = function(item){
-  return this.filter(function(){
-    var compare = $(this).tmplItem().data;
-    if (item.eql &amp;&amp; item.eql(compare) || item === compare)
-      return true;
-  });
+var template = '&lt;li&gt;&lt;a href="${url}"&gt;${getName()}&lt;/a&gt;&lt;/li&gt;';
+
+var element = jQuery.tmpl(template, object);
+// Produces: &lt;li&gt;&lt;a href="http://example.com"&gt;James&lt;/a&gt;&lt;/li&gt;
+
+$("body").append(element);
+</code></pre>
+
+<p>So, you can see we're interpolating variables using the <code>${}</code> syntax. Whatever is inside the brackets get executed in the context of the object passed to <code>jQuery.tmpl()</code>, regardless if it's a property or function.</p>
+
+<h2>Flow control</h2>
+
+<p>However, templates are much more powerful then mere interpolation. Most templating libraries have advanced features like conditional flow and iteration. You can control flow by using <code>if</code> and <code>else</code> statements, the same as with pure JavaScript. The difference here is that we need to wrap the keyword with double brackets, so the templating engine can pick them up.</p>
+
+<pre><code>{{if url}}
+  ${url}
+{{/if}}
+</code></pre>
+
+<p>The <code>if</code> block will be executed if the specified attribute value doesn't evaluate to <code>false</code>, <code>0</code>, <code>null</code> or <code>undefined</code>. As you can see, the block is closed with a <code>{{/if}}</code>, don't forget to include that!
+A common pattern is to display a message when an array, say of chat messages, is empty.</p>
+
+<pre><code>{{if messages.length}}
+  &lt;!-- Display messages... --&gt;
+{{else}}
+  &lt;p&gt;Sorry, there are no messages&lt;/p&gt;
+{{/if}}
+</code></pre>
+
+<p>Iteration is something no templating library can afford to be without. With JS templating libraries, you can iterate over any JavaScript type, be that an Object or Array, using the <code>{{each}}</code> keyword. If you pass an Object to <code>{{each}}</code>, it'll iterate a block over the object's properties. Likewise passing an array, results in the block iterating over every index in the array.</p>
+
+<p>When inside the block, you can access the value currently being iterated over using the <code>$value</code> variable. Displaying the value is the same as the interpolation example above, using <code>${$value}</code>. So, if we take an object like this:</p>
+
+<pre><code>var object = {
+  foo: "bar",
+  messages: ["Hi there", "Foo bar"]
 };
+</code></pre>
+
+<p>Then use the following template to iterate through the <code>messages</code> array, displaying each message. Additionally, the current iteration's index is also exposed using the <code>$index</code> variable.</p>
+
+<pre><code>&lt;ul&gt;
+  {{each messages}}
+    &lt;li&gt;${$index + 1}: &lt;em&gt;${$value}&lt;/em&gt;&lt;/li&gt;
+  {{/each}}
+&lt;/ul&gt;
+</code></pre>
+
+<p>That pretty much covers the jQuery.tmpl templating API - you can see it's very straightforward. As I mentioned earlier, most of the alternative templating libraries have a similar API, although many offer more advanced features, such as lambdas, partials and comments.</p>
+
+<h2>Loading in templates</h2>
+
+<p>So far we've been using templates defined inline in JavaScript, which is far from ideal. We want to keep our views and controller separate to conform to MVC, besides that's just plain ugly. However fortunately there's an alternative. We can define the templates as custom <code>&lt;script&gt;</code> elements in the page, like so:</p>
+
+<pre><code>&lt;script type="text/template" charset="utf-8" id="contact-template"&gt;
+  &lt;li&gt;${name}&lt;/li&gt;
+&lt;/script&gt;
+</code></pre>
+
+<p>The browser will just interpret the template as text, and won't try to render it. However, the script elements HTML will still be available. We can now render templates by fetching the template source straight from the <code>#contact-template</code> script.</p>
+
+<pre><code>var elements = $.tmpl($("#contact-template").html(), Contact.all());
+</code></pre>
+
+<p>That syntax is a bit convoluted, and jQuery.tmpl provides a shortcut, like so:</p>
+
+<pre><code>var elements = $("#contact-template").tmpl(Contact.all());
+$("#view").html(elements);
+</code></pre>
+
+<p>So far so good, we've now solved the problem of having templates inline in our JavaScript files. However, we still have to put them all inline in the page (<code>&lt;script src='foo'&gt;</code> doesn't work). One way round this is by loading templates in with Ajax, and appending them to the page. There are a lot of loader libraries, like <a href="http://requirejs.org">Require.js</a>, which will do this for you. However, let's create a custom jQuery plugin to show you the basics:</p>
+
+<pre><code>(function($){
+
+  var srcToName = function(name){
+    return name
+    .replace(/\.\w+?$/, "")
+    .replace(/(\/|_)/, "-");
+  };
+
+  var appendTemplate = function(src, html){
+    var template = $("&lt;script /&gt;");
+    template.attr({
+      type: "text/x-template",
+      id:   srcToName(src) + "-template"
+    });
+    template.html(html);
+    $("head").append(template);
+  };
+
+  $.loadTemplate = function(src, name){
+    $.ajax({url: src)})
+      .success(function(result){
+        appendTemplate(name || src, result);
+      });
+    return this;
+  };
+
+})(jQuery);
+</code></pre>
+
+<p>When <code>$.loadTemplate()</code> is called, the template is fetched from the server with Ajax and downloaded. Finally, when the request has finished, the template is appended to the page in much the same fashion as our manual implementation earlier. So, on startup, our application can remotely load all the templates it needs, which can then be used to render views.</p>
+
+<pre><code>$.loadTemplate("/templates/contacts.tmpl", "contacts");
+</code></pre>
+
+<h2>Finding template records</h2>
+
+<p>The last part of this tutorial deals with finding the original piece of data a rendered template is associated with. In other words, given a rendered contact element, we want to find the original <code>Contact</code> instance that was used to render the template. This is very useful in <em>click</em> events, for example, where you want to find out which record a user clicked on.</p>
+
+<p>To achieve this, jQuery.tmpl provides the <code>tmplItem()</code> function, which returns an object full of template information. You can call this on a rendered, template, for example:</p>
+
+<pre><code>var elements = $("#contact-template").tmpl(Contact.all());
+
+var templateData = elements.first().tmplItem();
+</code></pre>
+
+<p>We won't be needing most of the information returned by <code>tmplItem()</code>, but the <code>data</code> property is the one piece of information we do need. <code>data</code> will be set to the original object used by the template to render the element.</p>
+
+<pre><code>var elements = $("#contact-template").tmpl(Contact.first());
+var contact  = elements.tmplItem().data;
+</code></pre>
+
+<p>I often shortcut this process with some extensions to jQuery.tmpl, shown below.</p>
+
+<pre><code>(function($){
+  $.fn.item = function(){
+    var item = $(this).tmplItem().data;
+    return($.isFunction(item.reload) ? item.reload() : null);
+  };
+
+  $.fn.forItem = function(item){
+    return this.filter(function(){
+      var compare = $(this).tmplItem().data;
+      if (item.eql &amp;&amp; item.eql(compare) || item === compare)
+        return true;
+    });
+  };
+})(jQuery);
+</code></pre>
+
+<p><code>$.fn.item</code> can be used for finding the <code>Spine.Model</code> instance used when generating the template, and <code>$.fn.forItem</code> is useful for filtering elements to match a certain record.</p>
+
+<pre><code>var elements = $("#contact-template").tmpl(Contact.first());
+var contact  = elements.item();
 </code></pre>
 </div>
 </body>

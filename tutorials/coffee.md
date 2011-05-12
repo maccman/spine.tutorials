@@ -1,3 +1,5 @@
+<div class="back"><a href="index.html">&laquo; Back to all tutorials</a></div>
+
 #Using Spine and CoffeeScript
 
 [CoffeeScript](http://jashkenas.github.com/coffee-script) is a "little language that compiles into JavaScript". Essentially, its aim is to improve JavaScript syntax, meaning less typing for you, and often less errors. 
