@@ -21,9 +21,14 @@
 
 <p>So why would you want to use Spine with Node? Well for a start Spine's classes and models are just as useful server side as they are client side - and you can use them to structure and modularize your code. More importantly though, it paves the way for code re-use between server and client. You could potentially use the same models, classes and libraries on both the client and server side. Finally, you can run automated unit-tests in Node, testing your client-side code.</p>
 
+<p>You can install Spine using <a href="http://npmjs.org">npm</a>:</p>
+
+<pre><code>npm install spine
+</code></pre>
+
 <p>Spine's API in Node is exactly the same, the one difference being you first need to fetch a reference to the library using <code>require()</code>.</p>
 
-<pre><code>var Spine = require("./spine");
+<pre><code>var Spine = require("spine");
 
 var MyClass = Spine.Class.create({
   sameApi: "asUsual"
@@ -43,6 +48,57 @@ var MyClass = Spine.Class.create({
   exports.MyClass = Spine.Class.create();
 })();
 </code></pre>
+
+<h1>Testing with NodeJS &amp; Jasmine</h1>
+
+<p>The <a href="https://github.com/mhevery/jasmine-node">jasmine-node</a> project is a great way of running <a href="http://github.com/pivotal/jasmine">Jasmine</a> tests with Node. First install the package using npm:</p>
+
+<pre><code>npm install jasmine-node
+</code></pre>
+
+<p>Then you have a command line executable, <code>jasmine-node</code>, that can be used to run tests.</p>
+
+<pre><code>jasmine-node specs
+</code></pre>
+
+<p>You'll need to pass as directory to <code>jasmine-node</code> containing all your specs. Additionally, your specs need to be named *.spec.js to be picked up properly. Any files named *.helper.js will be loaded in before the specs are executed.</p>
+
+<p>For example, we can create a spec called <em>class.spec.js</em> to test Spine's classes.</p>
+
+<pre><code>var Spine = require("spine");
+
+describe("Class", function(){
+  var User;
+
+  beforeEach(function(){
+    User = Spine.Class.create();
+  });
+
+  it("is sane", function(){
+    expect(Spine).toBeTruthy();
+  });
+
+  it("can create subclasses", function(){
+    User.extend({classProperty: true});
+
+    var Friend = User.create();
+    expect(Friend).toBeTruthy();
+    expect(Friend.classProperty).toBeTruthy();
+  });
+});
+</code></pre>
+
+<p>And we can now run this spec using jasmine-node:</p>
+
+<pre><code>$ jasmine-node spec/
+  Started
+  ..........
+
+  Finished in 0.003 seconds
+  1 test, 17 assertions, 0 failures
+</code></pre>
+
+<p>To find out more information about Jasmine's spec syntax, see <a href="http://github.com/pivotal/jasmine">its documentation</a>.</p>
 </div>
 </body>
 </html>
