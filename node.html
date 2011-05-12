@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8>
+<title>Spine Tutorials</title>
+<link rel="stylesheet" href="site/site.css" type="text/css" charset="utf-8">
+<link rel="stylesheet" href="site/highlight.css" type="text/css" charset="utf-8">
+<script src="site/jquery.js" type="text/javascript" charset="utf-8"></script>      
+<script src="site/highlight.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+  hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="container"><div class="back"><a href="index.html">&laquo; Back to all tutorials</a></div>
+
+
+<h1>Using Spine and NodeJS</h1>
+
+<p><a href="http://nodejs.org/">NodeJS</a> is essentially a way of using Google's <a href="http://code.google.com/p/v8/">V8 JavaScript</a> engine for running JavaScript on the server side, taking advantage of its blazing speed and evented IO. Node provides a similar environment for scripts as in Google Chrome, with the exception of a DOM. Spine has special Node support, so everything that doesn't touch the DOM will work as usual, such as <code>Spine.Events</code>, <code>Spine.Class</code> and <code>Spine.Model</code>. The only component to Spine that won't work with NodeJS is <code>Spine.Controller</code>; as it relies on the DOM so even loading controllers will cause errors.</p>
+
+<p>So why would you want to use Spine with Node? Well for a start Spine's classes and models are just as useful server side as they are client side - and you can use them to structure and modularize your code. More importantly though, it paves the way for code re-use between server and client. You could potentially use the same models, classes and libraries on both the client and server side. Finally, you can run automated unit-tests in Node, testing your client-side code.</p>
+
+<p>Spine's API in Node is exactly the same, the one difference being you first need to fetch a reference to the library using <code>require()</code>.</p>
+
+<pre><code>var Spine = require("./spine");
+
+var MyClass = Spine.Class.create({
+  sameApi: "asUsual"
+});
+</code></pre>
+
+<h1>Exports</h1>
+
+<p>By default NodeJS encapsulates code preventing global scope pollution. If you want your client-side scripts to work with Node you'll have to explicitly expose any variables you want to be global. This is done by using the <code>exports</code> object, setting global variables as properties on it. To allow your scripts to run in either a server or client side environments, you can check to see if it exists, creating it if otherwise.</p>
+
+<pre><code>(function(){
+  // Set exports to global context unless defined
+  if (typeof exports == "undefined")
+    var exports = this;
+
+  // Expose MyClass
+  exports.MyClass = Spine.Class.create();
+})();
+</code></pre>
+</div>
+</body>
+</html>

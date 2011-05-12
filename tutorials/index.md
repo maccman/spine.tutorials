@@ -18,5 +18,7 @@ You should briefly read the [existing documentation](http://maccman.github.com/s
 
 * [Coffee Script](coffee.html) - use Spine and CoffeeScript together.
 
+* [NodeJS](node.html) - use Spine and NodeJS together. Use package managers and modules. 
+
 
 If you've any suggestions for additional tutorials, or questions about Spine, please [post them on the mailing list](https://groups.google.com/forum/#!forum/spinejs). 
