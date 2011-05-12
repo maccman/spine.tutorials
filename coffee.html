@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8>
+<title>Spine Tutorials</title>
+<link rel="stylesheet" href="site/site.css" type="text/css" charset="utf-8">
+<link rel="stylesheet" href="site/highlight.css" type="text/css" charset="utf-8">
+<script src="site/jquery.js" type="text/javascript" charset="utf-8"></script>      
+<script src="site/highlight.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+  hljs.initHighlightingOnLoad();
+</script>
+</head>
+<body>
+<div id="container"><h1>Using Spine and CoffeeScript</h1>
+
+<p><a href="http://jashkenas.github.com/coffee-script">CoffeeScript</a> is a "little language that compiles into JavaScript". Essentially, its aim is to improve JavaScript syntax, meaning less typing for you, and often less errors.</p>
+
+<p>CoffeeScript files compile down to pure JavaScript, and there's no interpretation at run time. This means you can use any existing JavaScript library seamlessly, and vice-versa. In other words, you can write you Spine applications in CoffeeScript, giving you a much sweeter syntax and saving time.</p>
+
+<p>You can use Spine &amp; CoffeeScript as-is, without any API changes. Use the same function names and properties, just use CoffeeScript's syntax for defining function and object literals.</p>
+
+<p>I'm not going to elaborate much on CoffeeScript's syntax here, see the <a href="http://jashkenas.github.com/coffee-script">official documentation</a> for that. What I am going to do though, is show you an example of a few Spine models and controllers, namely convert <a href="http://github.com/maccman/spine.todos">Spine.Todos</a> into CoffeeScript.</p>
+
+<p>Let's take the <code>Tasks</code> controller:</p>
+
+<pre><code>window.Tasks = Spine.Controller.create({
+  tag: "li",
+
+  proxied: ["render", "remove"],
+
+  events: {
+    "change   input[type=checkbox]": "toggle",
+    "blur     input[type=text]":     "close"
+  },
+
+  init: function(){
+    this.item.bind("update",  this.render);
+  }
+  // ...
+</code></pre>
+
+<p>First we're going to remove all <code>var</code> keywords, CoffeeScript will deal with scope for us. Then remove all semi colons, CoffeeScript inserts those later automatically. The next step is to use CoffeeScript's object literal syntax; as you can see braces are optional. Finally, we're going to convert calls to <code>function()</code> to CoffeeScript's function syntax, namely <code>-&gt;</code>. Here's the finished result:</p>
+
+<pre><code>Tasks = Spine.Controller.create
+  tag: "li"
+
+  proxied: ["render", "remove"]
+
+  events:
+   "change   input[type=checkbox]": "toggle",
+   "blur     input[type=text]":     "close"
+
+  init: -&gt;
+    this.item.bind("update",  this.render)
+</code></pre>
+
+<p>You can see the resultant syntax is much clearer, with less room for errors. You can also see the full <a href="https://github.com/maccman/spine.todos/blob/master/app/application.js">before</a> and <a href="https://github.com/maccman/spine.todos/blob/coffee/app/application.coffee">after</a> scripts for a comparison, and the CoffeeScript version of application.js is included below for convenience.</p>
+
+<pre><code>Task = Spine.Model.setup("Task", ["name", "done"])
+
+Task.extend(Spine.Model.Local)
+
+Task.extend
+  active: -&gt;
+    this.select (item) -&gt; !item.done
+
+  done: -&gt;
+    this.select (item) -&gt; !!item.done
+
+  destroyDone: -&gt;
+    rec.destroy() for rec in this.done()
+
+Tasks = Spine.Controller.create
+  tag: "li"
+
+  proxied: ["render", "remove"]
+
+  events:
+   "change   input[type=checkbox]": "toggle",
+   "click    .destroy":             "destroy",
+   "dblclick .view":                "edit",
+   "keypress input[type=text]":     "blurOnEnter",
+   "blur     input[type=text]":     "close"
+
+  elements:
+    "input[type=text]": "input",
+    ".item": "wrapper"
+
+  init: -&gt;
+    this.item.bind("update",  this.render)
+    this.item.bind("destroy", this.remove)
+
+  render: -&gt;
+    elements = $("#taskTemplate").tmpl(this.item)
+    this.el.html(elements)
+    this.refreshElements()
+    this
+
+  toggle: -&gt;
+    this.item.done = !this.item.done
+    this.item.save()
+
+  destroy: -&gt;
+    this.item.destroy()
+
+  edit: -&gt;
+    this.wrapper.addClass("editing")
+    this.input.focus()
+
+  blurOnEnter: (e) -&gt;
+    if e.keyCode == 13 then e.target.blur()
+
+  close: -&gt;
+    this.wrapper.removeClass("editing")
+    this.item.updateAttributes({name: this.input.val()})
+
+  remove: -&gt;
+    this.el.remove()
+
+TaskApp = Spine.Controller.create    
+  proxied: ["addOne", "addAll", "renderCount"]
+
+  events:
+    "submit form":   "create",
+    "click  .clear": "clear"
+
+  elements:
+    ".items":     "items",
+    ".countVal":  "count",
+    ".clear":     "clear",
+    "form input": "input"
+
+  init: -&gt;
+    Task.bind("create",  this.addOne)
+    Task.bind("refresh", this.addAll)
+    Task.bind("refresh change", this.renderCount)
+    Task.fetch()
+
+  addOne: (task) -&gt;
+    view = Tasks.init({item: task})
+    this.items.append(view.render().el)
+
+  addAll: -&gt;
+    Task.each(this.addOne)
+
+  create: (e) -&gt;
+    e.preventDefault()
+    Task.create({name: this.input.val()})
+    this.input.val("")
+
+  clear: -&gt;
+    Task.destroyDone()
+
+  renderCount: -&gt;
+    active = Task.active().length
+    this.count.text(active)
+
+    inactive = Task.done().length
+    if inactive 
+      this.clear.show()
+    else
+      this.clear.hide()
+
+jQuery -&gt;
+  TaskApp.init(el: $("#tasks"))
+</code></pre>
+</div>
+</body>
+</html>

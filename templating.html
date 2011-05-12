@@ -22,6 +22,20 @@
 <h1>Rendering templates</h1>
 
 <h1>Finding template elements</h1>
+
+<pre><code>$.fn.item = function(){
+  var item = $(this).tmplItem().data;
+  return($.isFunction(item.reload) ? item.reload() : null);
+};
+
+$.fn.forItem = function(item){
+  return this.filter(function(){
+    var compare = $(this).tmplItem().data;
+    if (item.eql &amp;&amp; item.eql(compare) || item === compare)
+      return true;
+  });
+};
+</code></pre>
 </div>
 </body>
 </html>

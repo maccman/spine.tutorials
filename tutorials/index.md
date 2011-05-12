@@ -14,7 +14,9 @@ You should briefly read the [existing documentation](http://maccman.github.com/s
 
 * [Controller patterns](patterns.html) - common controller patterns for rendering views.
 
-<!-- * [Templating](templating.html) - demonstrates how to use the jQuery.tmpl library to render views.  -->
+* [Templating](templating.html) - demonstrates how to use the jQuery.tmpl library to render views. 
+
+* [Coffee Script](coffee.html) - use Spine and CoffeeScript together.
 
 
 If you've any suggestions for additional tutorials, or questions about Spine, please [post them on the mailing list](https://groups.google.com/forum/#!forum/spinejs). 
