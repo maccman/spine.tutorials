@@ -99,6 +99,84 @@ describe("Class", function(){
 </code></pre>
 
 <p>To find out more information about Jasmine's spec syntax, see <a href="http://github.com/pivotal/jasmine">its documentation</a>.</p>
+
+<h1>Generating applications with Spine.App</h1>
+
+<p>Using <a href="http://github.com/maccman/spine.app">Spine.App</a> is great way of structuring your application, managing dependencies and automatically compiling <a href="http://jashkenas.github.com/coffee-script">CoffeeScript</a> and <a href="http://lesscss.org">LessCSS</a> files. Spine.App will also start up a server and host your application during development.</p>
+
+<h2>Installation</h2>
+
+<p>First step is to install the <a href="http://npmjs.org/">npm</a> package. If you don't already have <a href="http://npmjs.org/">npm</a> or <a href="http://nodejs.org/">NodeJS</a> you'll need to install them first.</p>
+
+<pre><code>$ npm install spine
+</code></pre>
+
+<p>Then we can generate the initial application structure like this:</p>
+
+<pre><code>$ spine app my_app
+</code></pre>
+
+<p>Now we've produced a directory structure looking like:</p>
+
+<pre><code>my_app
+my_app/app
+my_app/app/controllers
+my_app/app/models
+my_app/lib
+my_app/lib/jquery.js
+my_app/lib/spine.js
+my_app/public
+my_app/public/index.html
+my_app/public/css
+my_app/public/css/application.css
+my_app/public/images
+my_app/index.js
+</code></pre>
+
+<p>We can start the application by running <code>index.js</code>.</p>
+
+<pre><code>$ cd my_app
+$ node index.js
+</code></pre>
+
+<p>This will boot up an <a href="http://expressjs.com">Express</a> server on port <a href="http://localhost:9294">9294</a>.</p>
+
+<h2>Generating</h2>
+
+<p>You can now start generating Spine controllers and models:</p>
+
+<pre><code>$ spine controller users
+    app/controllers/users.coffee
+
+$ spine model user
+  app/models/user.coffee
+</code></pre>
+
+<p>Any application specific code should go in the <code>app</code> folder. Otherwise, generic code, should go in the <code>lib</code> folder.</p>
+
+<p><strong>Any <a href="http://jashkenas.github.com/coffee-script">CoffeeScript</a> or <a href="http://lesscss.org">LessCSS</a> files inside the application will be automatically compiled when requested</strong>, you don't need to worry about compiling them manually.</p>
+
+<h2>CommonJS modules</h2>
+
+<p><a href="https://github.com/sstephenson/stitch">Stitch</a> bundles up all your JavaScript files, enclosing them in a CommonJS wrapper. This means that scripts in the <code>app</code> folder need to be CommonJS compliant (basically exactly like normal Node scripts). In other words, to use a module you'll need to <code>require()</code> it, and you'll need to explicitly export any global variables.</p>
+
+<pre><code>Guide = require("controllers/guide")
+
+module.exports = Spine.Controller.create
+  elements:
+    "#item": "item"
+
+  init -&gt;
+</code></pre>
+
+<p>Inside your HTML files, you need only require <em>application.js</em> and every module will be wrapped up and ready to be loaded. As you can see, the generated <em>index.html</em> kicks things off by executing <em>app/app.coffee</em> when the page loads.</p>
+
+<pre><code>var exports = this;
+jQuery(function(){
+  var App = require("app");
+  exports.App = App.init({el: $("#body")});      
+});
+</code></pre>
 </div>
 </body>
 </html>
