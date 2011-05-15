@@ -167,9 +167,10 @@ module.exports = Spine.Controller.create
     "#item": "item"
 
   init -&gt;
+    this.guide = Guide.init(el: this.item)
 </code></pre>
 
-<p>Inside your HTML files, you need only require <em>application.js</em> and every module will be wrapped up and ready to be loaded. As you can see, the generated <em>index.html</em> kicks things off by executing <em>app/app.coffee</em> when the page loads.</p>
+<p>Inside your HTML files, you need only require <em>application.js</em> and every module will be wrapped up and ready to be loaded. As you can see, the generated <em>index.html</em> kicks things off by instantiating <em>app/app.coffee</em> when the page loads.</p>
 
 <pre><code>var exports = this;
 jQuery(function(){

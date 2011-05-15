@@ -4,7 +4,7 @@
 
 [CoffeeScript](http://jashkenas.github.com/coffee-script) is a "little language that compiles into JavaScript". Essentially, its aim is to improve JavaScript syntax, meaning less typing for you, and often less errors. 
 
-CoffeeScript files compile down to pure JavaScript, and there's no interpretation at run time. This means you can use any existing JavaScript library seamlessly, and vice-versa. In other words, you can write you Spine applications in CoffeeScript, giving you a much sweeter syntax and saving time.
+CoffeeScript files compile down to pure JavaScript, and there's no interpretation at run time. This means you can use any existing JavaScript library seamlessly, and vice-versa. In other words, you can write your Spine applications in CoffeeScript, giving you a much sweeter syntax and saving time.
 
 You can use Spine & CoffeeScript as-is, without any API changes. Use the same function names and properties, just use CoffeeScript's syntax for defining function and object literals. 
 
@@ -23,11 +23,11 @@ Let's take the `Tasks` controller:
       },
 
       init: function(){
-        this.item.bind("update",  this.render);
+        @item.bind("update",  @render);
       }
       // ...
       
-First we're going to remove all `var` keywords, CoffeeScript will deal with scope for us. Then remove all semi colons, CoffeeScript inserts those later automatically. The next step is to use CoffeeScript's object literal syntax; as you can see braces are optional. Finally, we're going to convert calls to `function()` to CoffeeScript's function syntax, namely `->`. Here's the finished result:
+First we're going to remove all `var` keywords, CoffeeScript will deal with scope for us. Then remove all semi colons, CoffeeScript inserts those later automatically. The next step is to use CoffeeScript's object literal syntax; as you can see braces are optional. CoffeeScript uses `@` as an alias for `this.`, so we can clean up a lot of code there. Finally, we're going to convert calls to `function()` to CoffeeScript's function syntax, namely `->`. Here's the finished result:
       
     Tasks = Spine.Controller.create
       tag: "li"
@@ -39,7 +39,7 @@ First we're going to remove all `var` keywords, CoffeeScript will deal with scop
        "blur     input[type=text]":     "close"
 
       init: ->
-        this.item.bind("update",  this.render)
+        @item.bind("update", @render)
 
 You can see the resultant syntax is much clearer, with less room for errors. You can also see the full [before](https://github.com/maccman/spine.todos/blob/master/app/application.js) and [after](https://github.com/maccman/spine.todos/blob/coffee/app/application.coffee) scripts for a comparison, and the CoffeeScript version of application.js is included below for convenience. 
 
@@ -50,13 +50,13 @@ You can see the resultant syntax is much clearer, with less room for errors. You
 
     Task.extend
       active: ->
-        this.select (item) -> !item.done
+        @select (item) -> !item.done
 
       done: ->
-        this.select (item) -> !!item.done
+        @select (item) -> !!item.done
 
       destroyDone: ->
-        rec.destroy() for rec in this.done()
+        rec.destroy() for rec in @done()
 
     Tasks = Spine.Controller.create
       tag: "li"
@@ -75,35 +75,35 @@ You can see the resultant syntax is much clearer, with less room for errors. You
         ".item": "wrapper"
 
       init: ->
-        this.item.bind("update",  this.render)
-        this.item.bind("destroy", this.remove)
+        @item.bind("update",  @render)
+        @item.bind("destroy", @remove)
 
       render: ->
-        elements = $("#taskTemplate").tmpl(this.item)
-        this.el.html(elements)
-        this.refreshElements()
+        elements = $("#taskTemplate").tmpl(@item)
+        @el.html(elements)
+        @refreshElements()
         this
 
       toggle: ->
-        this.item.done = !this.item.done
-        this.item.save()
+        @item.done = !@item.done
+        @item.save()
 
       destroy: ->
-        this.item.destroy()
+        @item.destroy()
 
       edit: ->
-        this.wrapper.addClass("editing")
-        this.input.focus()
+        @wrapper.addClass("editing")
+        @input.focus()
 
       blurOnEnter: (e) ->
         if e.keyCode == 13 then e.target.blur()
 
       close: ->
-        this.wrapper.removeClass("editing")
-        this.item.updateAttributes({name: this.input.val()})
+        @wrapper.removeClass("editing")
+        @item.updateAttributes({name: @input.val()})
 
       remove: ->
-        this.el.remove()
+        @el.remove()
 
     TaskApp = Spine.Controller.create    
       proxied: ["addOne", "addAll", "renderCount"]
@@ -119,35 +119,35 @@ You can see the resultant syntax is much clearer, with less room for errors. You
         "form input": "input"
 
       init: ->
-        Task.bind("create",  this.addOne)
-        Task.bind("refresh", this.addAll)
-        Task.bind("refresh change", this.renderCount)
+        Task.bind("create",  @addOne)
+        Task.bind("refresh", @addAll)
+        Task.bind("refresh change", @renderCount)
         Task.fetch()
 
       addOne: (task) ->
         view = Tasks.init({item: task})
-        this.items.append(view.render().el)
+        @items.append(view.render().el)
 
       addAll: ->
-        Task.each(this.addOne)
+        Task.each(@addOne)
 
       create: (e) ->
         e.preventDefault()
-        Task.create({name: this.input.val()})
-        this.input.val("")
+        Task.create({name: @input.val()})
+        @input.val("")
 
       clear: ->
         Task.destroyDone()
 
       renderCount: ->
         active = Task.active().length
-        this.count.text(active)
+        @count.text(active)
 
         inactive = Task.done().length
         if inactive 
-          this.clear.show()
+          @clear.show()
         else
-          this.clear.hide()
+          @clear.hide()
 
     jQuery ->
       TaskApp.init(el: $("#tasks"))
