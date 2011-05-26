@@ -61,7 +61,7 @@ When the two controllers are activated by the sidebar menu, the *active* class s
 
 Spine provides a simple abstraction on top of it's `Spine.Manager` class for tab integration, `Spine.Tabs`. The class lets you associate a 'tab' with a controller, and when the tab is clicked the controller is activated. 
 
-The first step is to include [spine.tabs.js](https://github.com/maccman/spine/raw/master/lib/spine.tabs.js). `Spine.Tabs` relies on either [jQuery](http://jquery.com) or Zepto, so you'll need to include one or the other in the page too, as well as [spine.manager.js](https://github.com/maccman/spine/raw/master/lib/spine.tabs.js).
+The first step is to include [spine.tabs.js](https://github.com/maccman/spine/raw/master/lib/spine.tabs.js). `Spine.Tabs` relies on either [jQuery](http://jquery.com) or [Zepto](http://zeptojs.com/), so you'll need to include one or the other in the page too, as well as [spine.manager.js](https://github.com/maccman/spine/raw/master/lib/spine.tabs.js).
 
     <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
     <script src="spine.js" type="text/javascript" charset="utf-8"></script>
