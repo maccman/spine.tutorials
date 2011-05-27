@@ -36,7 +36,7 @@ Calling `preventDefault()` on the event prevents the default action, and is pref
 
 So, now we know when forms are being submitted, but how about actually retrieving the data contained inside the form. We could manually go through every input element in the form, reading their value, but we're lazy so let's automate it!
 
-[jQuery](http://jquery.com) has a rather useful function called `serializeArray()` ([documented here](api.jquery.com/serializeArray/)), which serializes forms based on their input's name and values. However, the returned result looks like this, and can't be directly used with Spine:
+[jQuery](http://jquery.com) has a rather useful function called `serializeArray()` ([documented here](http://api.jquery.com/serializeArray/)), which serializes forms based on their input's name and values. However, the returned result looks like this, and can't be directly used with Spine:
 
     [{name: "first_name", value: "Alex"}, {name: "last_name", value: "MacCaw"}]
     

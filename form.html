@@ -53,7 +53,7 @@ Contacts.init({el: $("body")});
 
 <p>So, now we know when forms are being submitted, but how about actually retrieving the data contained inside the form. We could manually go through every input element in the form, reading their value, but we're lazy so let's automate it!</p>
 
-<p><a href="http://jquery.com">jQuery</a> has a rather useful function called <code>serializeArray()</code> (<a href="http://api.jquery.com/serializeArray/">documented here</a>), which serializes forms based on their input's name and values. However, the returned result looks like this, and can't be directly used with Spine:</p>
+<p><a href="http://jquery.com">jQuery</a> has a rather useful function called <code>serializeArray()</code> (<a href="api.jquery.com/serializeArray/">documented here</a>), which serializes forms based on their input's name and values. However, the returned result looks like this, and can't be directly used with Spine:</p>
 
 <pre><code>[{name: "first_name", value: "Alex"}, {name: "last_name", value: "MacCaw"}]
 </code></pre>
