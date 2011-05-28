@@ -222,7 +222,7 @@ That's all there is to `Spine.List`. Now let's show a full example to give you a
     
         // Create controller
         var Contacts = Spine.Controller.create({
-          elements: {".list": "listEl", ".main": "main"},
+          elements: {".sidebar": "listEl", ".main": "main"},
           proxied: ["render", "change"],
       
           init: function(){
