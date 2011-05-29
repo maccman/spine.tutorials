@@ -192,7 +192,7 @@ Lastly we need to listen to *change* events, which will be invoked whenever user
 That's all there is to `Spine.List`. Now let's show a full example to give you a bit of context. Firstly we're going to need two simple template, `#contacts-template` for the list and `#contact-template` for the main view. Then, as demonstrated above, we're going to render the list and listen to *change* events. When the currently selected item in the list changes, we'll re-render the main view with the newly selected record.
 
     <script type="text/x-template" charset="utf-8" id="contacts-template">
-      <li>${name}</li>
+      <li class="item">${name}</li>
     </script>
     
     <script type="text/x-template" charset="utf-8" id="contact-template">
@@ -222,7 +222,7 @@ That's all there is to `Spine.List`. Now let's show a full example to give you a
     
         // Create controller
         var Contacts = Spine.Controller.create({
-          elements: {".sidebar": "listEl", ".main": "main"},
+          elements: {".sidebar ul": "listEl", ".main": "main"},
           proxied: ["render", "change"],
       
           init: function(){

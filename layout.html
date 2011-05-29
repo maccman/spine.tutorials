@@ -219,7 +219,7 @@ tabs.render();
 <p>That's all there is to <code>Spine.List</code>. Now let's show a full example to give you a bit of context. Firstly we're going to need two simple template, <code>#contacts-template</code> for the list and <code>#contact-template</code> for the main view. Then, as demonstrated above, we're going to render the list and listen to <em>change</em> events. When the currently selected item in the list changes, we'll re-render the main view with the newly selected record.</p>
 
 <pre><code>&lt;script type="text/x-template" charset="utf-8" id="contacts-template"&gt;
-  &lt;li&gt;${name}&lt;/li&gt;
+  &lt;li class="item"&gt;${name}&lt;/li&gt;
 &lt;/script&gt;
 
 &lt;script type="text/x-template" charset="utf-8" id="contact-template"&gt;
@@ -249,7 +249,7 @@ tabs.render();
 
     // Create controller
     var Contacts = Spine.Controller.create({
-      elements: {".list": "listEl", ".main": "main"},
+      elements: {".sidebar ul": "listEl", ".main": "main"},
       proxied: ["render", "change"],
 
       init: function(){
