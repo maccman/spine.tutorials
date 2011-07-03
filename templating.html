@@ -125,7 +125,7 @@ $("#view").html(elements);
   };
 
   $.loadTemplate = function(src, name){
-    $.ajax({url: src)})
+    $.ajax({url: src})
       .success(function(result){
         appendTemplate(name || src, result);
       });

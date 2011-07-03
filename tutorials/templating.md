@@ -102,7 +102,7 @@ So far so good, we've now solved the problem of having templates inline in our J
       };
     
       $.loadTemplate = function(src, name){
-        $.ajax({url: src)})
+        $.ajax({url: src})
           .success(function(result){
             appendTemplate(name || src, result);
           });
